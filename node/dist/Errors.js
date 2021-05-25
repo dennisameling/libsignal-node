@@ -7,9 +7,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var ErrorCode;
 (function (ErrorCode) {
     ErrorCode[ErrorCode["Generic"] = 0] = "Generic";
-    ErrorCode[ErrorCode["DuplicatedMessage"] = 1] = "DuplicatedMessage";
+    ErrorCode[ErrorCode["UntrustedIdentity"] = 1] = "UntrustedIdentity";
     ErrorCode[ErrorCode["SealedSenderSelfSend"] = 2] = "SealedSenderSelfSend";
-    ErrorCode[ErrorCode["UntrustedIdentity"] = 3] = "UntrustedIdentity";
 })(ErrorCode = exports.ErrorCode || (exports.ErrorCode = {}));
 class SignalClientErrorBase extends Error {
     constructor(message, name, operation, extraProps) {

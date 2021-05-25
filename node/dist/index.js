@@ -280,7 +280,7 @@ class SignalMessage {
     constructor(handle) {
         this._nativeHandle = handle;
     }
-    static _new(messageVersion, macKey, senderRatchetKey, counter, previousCounter, ciphertext, senderIdentityKey, receiverIdentityKey) {
+    static new(messageVersion, macKey, senderRatchetKey, counter, previousCounter, ciphertext, senderIdentityKey, receiverIdentityKey) {
         return new SignalMessage(NativeImpl.SignalMessage_New(messageVersion, macKey, senderRatchetKey, counter, previousCounter, ciphertext, senderIdentityKey, receiverIdentityKey));
     }
     static deserialize(buffer) {
@@ -307,7 +307,7 @@ class PreKeySignalMessage {
     constructor(handle) {
         this._nativeHandle = handle;
     }
-    static _new(messageVersion, registrationId, preKeyId, signedPreKeyId, baseKey, identityKey, signalMessage) {
+    static new(messageVersion, registrationId, preKeyId, signedPreKeyId, baseKey, identityKey, signalMessage) {
         return new PreKeySignalMessage(NativeImpl.PreKeySignalMessage_New(messageVersion, registrationId, preKeyId, signedPreKeyId, baseKey, identityKey, signalMessage));
     }
     static deserialize(buffer) {
@@ -460,8 +460,8 @@ class SenderKeyDistributionMessage {
             return new SenderKeyDistributionMessage(handle);
         });
     }
-    static _new(messageVersion, distributionId, chainId, iteration, chainKey, pk) {
-        return new SenderKeyDistributionMessage(NativeImpl.SenderKeyDistributionMessage_New(messageVersion, Buffer.from(uuid.parse(distributionId)), chainId, iteration, chainKey, pk));
+    static new(distributionId, chainId, iteration, chainKey, pk) {
+        return new SenderKeyDistributionMessage(NativeImpl.SenderKeyDistributionMessage_New(Buffer.from(uuid.parse(distributionId)), chainId, iteration, chainKey, pk));
     }
     static deserialize(buffer) {
         return new SenderKeyDistributionMessage(NativeImpl.SenderKeyDistributionMessage_Deserialize(buffer));
@@ -493,8 +493,8 @@ class SenderKeyMessage {
     constructor(nativeHandle) {
         this._nativeHandle = nativeHandle;
     }
-    static _new(messageVersion, distributionId, chainId, iteration, ciphertext, pk) {
-        return new SenderKeyMessage(NativeImpl.SenderKeyMessage_New(messageVersion, Buffer.from(uuid.parse(distributionId)), chainId, iteration, ciphertext, pk));
+    static new(distributionId, chainId, iteration, ciphertext, pk) {
+        return new SenderKeyMessage(NativeImpl.SenderKeyMessage_New(Buffer.from(uuid.parse(distributionId)), chainId, iteration, ciphertext, pk));
     }
     static deserialize(buffer) {
         return new SenderKeyMessage(NativeImpl.SenderKeyMessage_Deserialize(buffer));
@@ -737,11 +737,8 @@ function sealedSenderEncrypt(content, address, identityStore) {
     return NativeImpl.SealedSender_Encrypt(address, content, identityStore, null);
 }
 exports.sealedSenderEncrypt = sealedSenderEncrypt;
-function sealedSenderMultiRecipientEncrypt(content, recipients, identityStore, sessionStore) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const recipientSessions = yield sessionStore.getExistingSessions(recipients);
-        return yield NativeImpl.SealedSender_MultiRecipientEncrypt(recipients, recipientSessions, content, identityStore, null);
-    });
+function sealedSenderMultiRecipientEncrypt(content, recipients, identityStore) {
+    return NativeImpl.SealedSender_MultiRecipientEncrypt(recipients, content, identityStore, null);
 }
 exports.sealedSenderMultiRecipientEncrypt = sealedSenderMultiRecipientEncrypt;
 // For testing only

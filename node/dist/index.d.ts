@@ -126,7 +126,7 @@ export declare class SignedPreKeyRecord {
 export declare class SignalMessage {
     readonly _nativeHandle: Native.SignalMessage;
     private constructor();
-    static _new(messageVersion: number, macKey: Buffer, senderRatchetKey: PublicKey, counter: number, previousCounter: number, ciphertext: Buffer, senderIdentityKey: PublicKey, receiverIdentityKey: PublicKey): SignalMessage;
+    static new(messageVersion: number, macKey: Buffer, senderRatchetKey: PublicKey, counter: number, previousCounter: number, ciphertext: Buffer, senderIdentityKey: PublicKey, receiverIdentityKey: PublicKey): SignalMessage;
     static deserialize(buffer: Buffer): SignalMessage;
     body(): Buffer;
     counter(): number;
@@ -137,7 +137,7 @@ export declare class SignalMessage {
 export declare class PreKeySignalMessage {
     readonly _nativeHandle: Native.PreKeySignalMessage;
     private constructor();
-    static _new(messageVersion: number, registrationId: number, preKeyId: number | null, signedPreKeyId: number, baseKey: PublicKey, identityKey: PublicKey, signalMessage: SignalMessage): PreKeySignalMessage;
+    static new(messageVersion: number, registrationId: number, preKeyId: number | null, signedPreKeyId: number, baseKey: PublicKey, identityKey: PublicKey, signalMessage: SignalMessage): PreKeySignalMessage;
     static deserialize(buffer: Buffer): PreKeySignalMessage;
     preKeyId(): number | null;
     registrationId(): number;
@@ -197,7 +197,7 @@ export declare class SenderKeyDistributionMessage {
     readonly _nativeHandle: Native.SenderKeyDistributionMessage;
     private constructor();
     static create(sender: ProtocolAddress, distributionId: Uuid, store: SenderKeyStore): Promise<SenderKeyDistributionMessage>;
-    static _new(messageVersion: number, distributionId: Uuid, chainId: number, iteration: number, chainKey: Buffer, pk: PublicKey): SenderKeyDistributionMessage;
+    static new(distributionId: Uuid, chainId: number, iteration: number, chainKey: Buffer, pk: PublicKey): SenderKeyDistributionMessage;
     static deserialize(buffer: Buffer): SenderKeyDistributionMessage;
     serialize(): Buffer;
     chainKey(): Buffer;
@@ -209,7 +209,7 @@ export declare function processSenderKeyDistributionMessage(sender: ProtocolAddr
 export declare class SenderKeyMessage {
     readonly _nativeHandle: Native.SenderKeyMessage;
     private constructor();
-    static _new(messageVersion: number, distributionId: Uuid, chainId: number, iteration: number, ciphertext: Buffer, pk: PrivateKey): SenderKeyMessage;
+    static new(distributionId: Uuid, chainId: number, iteration: number, ciphertext: Buffer, pk: PrivateKey): SenderKeyMessage;
     static deserialize(buffer: Buffer): SenderKeyMessage;
     serialize(): Buffer;
     ciphertext(): Buffer;
@@ -236,7 +236,6 @@ export declare abstract class SessionStore implements Native.SessionStore {
     _getSession(name: Native.ProtocolAddress): Promise<Native.SessionRecord | null>;
     abstract saveSession(name: ProtocolAddress, record: SessionRecord): Promise<void>;
     abstract getSession(name: ProtocolAddress): Promise<SessionRecord | null>;
-    abstract getExistingSessions(addresses: ProtocolAddress[]): Promise<SessionRecord[]>;
 }
 export declare abstract class IdentityKeyStore implements Native.IdentityKeyStore {
     _getIdentityKey(): Promise<Native.PrivateKey>;
@@ -294,7 +293,7 @@ export declare function signalDecrypt(message: SignalMessage, address: ProtocolA
 export declare function signalDecryptPreKey(message: PreKeySignalMessage, address: ProtocolAddress, sessionStore: SessionStore, identityStore: IdentityKeyStore, prekeyStore: PreKeyStore, signedPrekeyStore: SignedPreKeyStore): Promise<Buffer>;
 export declare function sealedSenderEncryptMessage(message: Buffer, address: ProtocolAddress, senderCert: SenderCertificate, sessionStore: SessionStore, identityStore: IdentityKeyStore): Promise<Buffer>;
 export declare function sealedSenderEncrypt(content: UnidentifiedSenderMessageContent, address: ProtocolAddress, identityStore: IdentityKeyStore): Promise<Buffer>;
-export declare function sealedSenderMultiRecipientEncrypt(content: UnidentifiedSenderMessageContent, recipients: ProtocolAddress[], identityStore: IdentityKeyStore, sessionStore: SessionStore): Promise<Buffer>;
+export declare function sealedSenderMultiRecipientEncrypt(content: UnidentifiedSenderMessageContent, recipients: ProtocolAddress[], identityStore: IdentityKeyStore): Promise<Buffer>;
 export declare function sealedSenderMultiRecipientMessageForSingleRecipient(message: Buffer): Buffer;
 export declare function sealedSenderDecryptMessage(message: Buffer, trustRoot: PublicKey, timestamp: number, localE164: string | null, localUuid: string, localDeviceId: number, sessionStore: SessionStore, identityStore: IdentityKeyStore, prekeyStore: PreKeyStore, signedPrekeyStore: SignedPreKeyStore): Promise<SealedSenderDecryptionResult>;
 export declare function sealedSenderDecryptToUsmc(message: Buffer, identityStore: IdentityKeyStore): Promise<UnidentifiedSenderMessageContent>;
