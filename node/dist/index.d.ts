@@ -5,7 +5,8 @@ export declare const initLogger: typeof Native.initLogger, LogLevel: typeof Nati
 export declare const enum CiphertextMessageType {
     Whisper = 2,
     PreKey = 3,
-    SenderKey = 7
+    SenderKey = 7,
+    Plaintext = 8
 }
 export declare const enum Direction {
     Sending = 0,
@@ -13,8 +14,8 @@ export declare const enum Direction {
 }
 export declare const enum ContentHint {
     Default = 0,
-    Supplementary = 1,
-    Retry = 2
+    Resendable = 1,
+    Implicit = 2
 }
 export declare type Uuid = string;
 export declare class HKDF {
@@ -155,6 +156,7 @@ export declare class SessionRecord {
     localRegistrationId(): number;
     remoteRegistrationId(): number;
     hasCurrentState(): boolean;
+    currentRatchetKeyMatches(key: PublicKey): boolean;
 }
 export declare class ServerCertificate {
     readonly _nativeHandle: Native.ServerCertificate;
@@ -281,12 +283,37 @@ export declare class SealedSenderDecryptionResult {
     senderUuid(): string;
     deviceId(): number;
 }
+interface CiphertextMessageConvertible {
+    asCiphertextMessage(): CiphertextMessage;
+}
 export declare class CiphertextMessage {
     readonly _nativeHandle: Native.CiphertextMessage;
     private constructor();
     static _fromNativeHandle(nativeHandle: Native.CiphertextMessage): CiphertextMessage;
+    static from(message: CiphertextMessageConvertible): CiphertextMessage;
     serialize(): Buffer;
     type(): number;
+}
+export declare class PlaintextContent implements CiphertextMessageConvertible {
+    readonly _nativeHandle: Native.PlaintextContent;
+    private constructor();
+    static deserialize(buffer: Buffer): PlaintextContent;
+    static from(message: DecryptionErrorMessage): PlaintextContent;
+    serialize(): Buffer;
+    body(): Buffer;
+    asCiphertextMessage(): CiphertextMessage;
+}
+export declare class DecryptionErrorMessage {
+    readonly _nativeHandle: Native.DecryptionErrorMessage;
+    private constructor();
+    static _fromNativeHandle(nativeHandle: Native.DecryptionErrorMessage): DecryptionErrorMessage;
+    static forOriginal(bytes: Buffer, type: CiphertextMessageType, timestamp: number, originalSenderDeviceId: number): DecryptionErrorMessage;
+    static deserialize(buffer: Buffer): DecryptionErrorMessage;
+    static extractFromSerializedBody(buffer: Buffer): DecryptionErrorMessage;
+    serialize(): Buffer;
+    timestamp(): number;
+    deviceId(): number;
+    ratchetKey(): PublicKey | undefined;
 }
 export declare function processPreKeyBundle(bundle: PreKeyBundle, address: ProtocolAddress, sessionStore: SessionStore, identityStore: IdentityKeyStore): Promise<void>;
 export declare function signalEncrypt(message: Buffer, address: ProtocolAddress, sessionStore: SessionStore, identityStore: IdentityKeyStore): Promise<CiphertextMessage>;

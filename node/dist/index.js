@@ -355,6 +355,9 @@ class SessionRecord {
     hasCurrentState() {
         return NativeImpl.SessionRecord_HasCurrentState(this);
     }
+    currentRatchetKeyMatches(key) {
+        return NativeImpl.SessionRecord_CurrentRatchetKeyMatches(this, key);
+    }
 }
 exports.SessionRecord = SessionRecord;
 class ServerCertificate {
@@ -699,6 +702,9 @@ class CiphertextMessage {
     static _fromNativeHandle(nativeHandle) {
         return new CiphertextMessage(nativeHandle);
     }
+    static from(message) {
+        return message.asCiphertextMessage();
+    }
     serialize() {
         return NativeImpl.CiphertextMessage_Serialize(this);
     }
@@ -707,6 +713,63 @@ class CiphertextMessage {
     }
 }
 exports.CiphertextMessage = CiphertextMessage;
+class PlaintextContent {
+    constructor(nativeHandle) {
+        this._nativeHandle = nativeHandle;
+    }
+    static deserialize(buffer) {
+        return new PlaintextContent(NativeImpl.PlaintextContent_Deserialize(buffer));
+    }
+    static from(message) {
+        return new PlaintextContent(NativeImpl.PlaintextContent_FromDecryptionErrorMessage(message));
+    }
+    serialize() {
+        return NativeImpl.PlaintextContent_Serialize(this);
+    }
+    body() {
+        return NativeImpl.PlaintextContent_GetBody(this);
+    }
+    asCiphertextMessage() {
+        return CiphertextMessage._fromNativeHandle(NativeImpl.CiphertextMessage_FromPlaintextContent(this));
+    }
+}
+exports.PlaintextContent = PlaintextContent;
+class DecryptionErrorMessage {
+    constructor(nativeHandle) {
+        this._nativeHandle = nativeHandle;
+    }
+    static _fromNativeHandle(nativeHandle) {
+        return new DecryptionErrorMessage(nativeHandle);
+    }
+    static forOriginal(bytes, type, timestamp, originalSenderDeviceId) {
+        return new DecryptionErrorMessage(NativeImpl.DecryptionErrorMessage_ForOriginalMessage(bytes, type, timestamp, originalSenderDeviceId));
+    }
+    static deserialize(buffer) {
+        return new DecryptionErrorMessage(NativeImpl.DecryptionErrorMessage_Deserialize(buffer));
+    }
+    static extractFromSerializedBody(buffer) {
+        return new DecryptionErrorMessage(NativeImpl.DecryptionErrorMessage_ExtractFromSerializedContent(buffer));
+    }
+    serialize() {
+        return NativeImpl.DecryptionErrorMessage_Serialize(this);
+    }
+    timestamp() {
+        return NativeImpl.DecryptionErrorMessage_GetTimestamp(this);
+    }
+    deviceId() {
+        return NativeImpl.DecryptionErrorMessage_GetDeviceId(this);
+    }
+    ratchetKey() {
+        const keyHandle = NativeImpl.DecryptionErrorMessage_GetRatchetKey(this);
+        if (keyHandle) {
+            return PublicKey._fromNativeHandle(keyHandle);
+        }
+        else {
+            return undefined;
+        }
+    }
+}
+exports.DecryptionErrorMessage = DecryptionErrorMessage;
 function processPreKeyBundle(bundle, address, sessionStore, identityStore) {
     return NativeImpl.SessionBuilder_ProcessPreKeyBundle(bundle, address, sessionStore, identityStore, null);
 }
