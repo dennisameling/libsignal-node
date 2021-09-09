@@ -61,11 +61,11 @@ class InMemorySessionStore extends SignalClient.SessionStore {
     }
 }
 class InMemoryIdentityKeyStore extends SignalClient.IdentityKeyStore {
-    constructor() {
+    constructor(localRegistrationId) {
         super();
         this.idKeys = new Map();
         this.identityKey = SignalClient.PrivateKey.generate();
-        this.localRegistrationId = 5;
+        this.localRegistrationId = (localRegistrationId !== null && localRegistrationId !== void 0 ? localRegistrationId : 5);
     }
     getIdentityKey() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -650,6 +650,53 @@ describe('SignalClient', () => {
             chai_1.assert.deepEqual(bUsmc.groupId(), Buffer.from([42]));
             const bPtext = yield SignalClient.groupDecrypt(aAddress, bSenderKeyStore, bUsmc.contents());
             chai_1.assert.deepEqual(message, bPtext);
+        }));
+        it('rejects invalid registration IDs', () => __awaiter(void 0, void 0, void 0, function* () {
+            const aKeys = new InMemoryIdentityKeyStore();
+            const bKeys = new InMemoryIdentityKeyStore(0x4000);
+            const aSess = new InMemorySessionStore();
+            const bPreKey = SignalClient.PrivateKey.generate();
+            const bSPreKey = SignalClient.PrivateKey.generate();
+            const aIdentityKey = yield aKeys.getIdentityKey();
+            const bIdentityKey = yield bKeys.getIdentityKey();
+            const aE164 = '+14151111111';
+            const aDeviceId = 1;
+            const bDeviceId = 3;
+            const aUuid = '9d0652a3-dcc3-4d11-975f-74d61598733f';
+            const bUuid = '796abedb-ca4e-4f18-8803-1fde5b921f9f';
+            const trustRoot = SignalClient.PrivateKey.generate();
+            const serverKey = SignalClient.PrivateKey.generate();
+            const serverCert = SignalClient.ServerCertificate.new(1, serverKey.getPublicKey(), trustRoot);
+            const expires = 1605722925;
+            const senderCert = SignalClient.SenderCertificate.new(aUuid, aE164, aDeviceId, aIdentityKey.getPublicKey(), expires, serverCert, serverKey);
+            const bPreKeyId = 31337;
+            const bSignedPreKeyId = 22;
+            const bSignedPreKeySig = bIdentityKey.sign(bSPreKey.getPublicKey().serialize());
+            const bPreKeyBundle = SignalClient.PreKeyBundle.new(0x4000, bDeviceId, bPreKeyId, bPreKey.getPublicKey(), bSignedPreKeyId, bSPreKey.getPublicKey(), bSignedPreKeySig, bIdentityKey.getPublicKey());
+            const bAddress = SignalClient.ProtocolAddress.new(bUuid, bDeviceId);
+            yield SignalClient.processPreKeyBundle(bPreKeyBundle, bAddress, aSess, aKeys);
+            const aAddress = SignalClient.ProtocolAddress.new(aUuid, aDeviceId);
+            const distributionId = 'd1d1d1d1-7000-11eb-b32a-33b8a8a487a6';
+            const aSenderKeyStore = new InMemorySenderKeyStore();
+            yield SignalClient.SenderKeyDistributionMessage.create(aAddress, distributionId, aSenderKeyStore);
+            const message = Buffer.from('0a0b0c', 'hex');
+            const aCtext = yield SignalClient.groupEncrypt(aAddress, distributionId, aSenderKeyStore, message);
+            const aUsmc = SignalClient.UnidentifiedSenderMessageContent.new(aCtext, senderCert, 2 /* Implicit */, Buffer.from([42]));
+            try {
+                yield SignalClient.sealedSenderMultiRecipientEncrypt(aUsmc, [bAddress], aKeys, aSess);
+                chai_1.assert.fail('should have thrown');
+            }
+            catch (e) {
+                chai_1.assert.instanceOf(e, Error);
+                chai_1.assert.instanceOf(e, SignalClient.SignalClientErrorBase);
+                const err = e;
+                chai_1.assert.equal(err.name, 'InvalidRegistrationId');
+                chai_1.assert.equal(err.code, SignalClient.ErrorCode.InvalidRegistrationId);
+                chai_1.assert.exists(err.stack); // Make sure we're still getting the benefits of Error.
+                const registrationIdErr = err;
+                chai_1.assert.equal(registrationIdErr.addr.name(), bAddress.name());
+                chai_1.assert.equal(registrationIdErr.addr.deviceId(), bAddress.deviceId());
+            }
         }));
     });
     it('DecryptionMessageError', () => __awaiter(void 0, void 0, void 0, function* () {

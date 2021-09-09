@@ -19,6 +19,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const uuid = require("uuid");
 const Errors = require("./Errors");
 __export(require("./Errors"));
+const Address_1 = require("./Address");
+__export(require("./Address"));
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const NativeImpl = require('node-gyp-build')(__dirname + '/../..');
 exports.initLogger = NativeImpl.initLogger, exports.LogLevel = NativeImpl.LogLevel;
@@ -92,24 +94,6 @@ class Aes256GcmSiv {
     }
 }
 exports.Aes256GcmSiv = Aes256GcmSiv;
-class ProtocolAddress {
-    constructor(handle) {
-        this._nativeHandle = handle;
-    }
-    static _fromNativeHandle(handle) {
-        return new ProtocolAddress(handle);
-    }
-    static new(name, deviceId) {
-        return new ProtocolAddress(NativeImpl.ProtocolAddress_New(name, deviceId));
-    }
-    name() {
-        return NativeImpl.ProtocolAddress_Name(this);
-    }
-    deviceId() {
-        return NativeImpl.ProtocolAddress_DeviceId(this);
-    }
-}
-exports.ProtocolAddress = ProtocolAddress;
 class PublicKey {
     constructor(handle) {
         this._nativeHandle = handle;
@@ -558,12 +542,12 @@ exports.UnidentifiedSenderMessageContent = UnidentifiedSenderMessageContent;
 class SessionStore {
     _saveSession(name, record) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.saveSession(ProtocolAddress._fromNativeHandle(name), SessionRecord._fromNativeHandle(record));
+            return this.saveSession(Address_1.ProtocolAddress._fromNativeHandle(name), SessionRecord._fromNativeHandle(record));
         });
     }
     _getSession(name) {
         return __awaiter(this, void 0, void 0, function* () {
-            const sess = yield this.getSession(ProtocolAddress._fromNativeHandle(name));
+            const sess = yield this.getSession(Address_1.ProtocolAddress._fromNativeHandle(name));
             if (sess == null) {
                 return null;
             }
@@ -588,18 +572,18 @@ class IdentityKeyStore {
     }
     _saveIdentity(name, key) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.saveIdentity(ProtocolAddress._fromNativeHandle(name), PublicKey._fromNativeHandle(key));
+            return this.saveIdentity(Address_1.ProtocolAddress._fromNativeHandle(name), PublicKey._fromNativeHandle(key));
         });
     }
     _isTrustedIdentity(name, key, sending) {
         return __awaiter(this, void 0, void 0, function* () {
             const direction = sending ? 0 /* Sending */ : 1 /* Receiving */;
-            return this.isTrustedIdentity(ProtocolAddress._fromNativeHandle(name), PublicKey._fromNativeHandle(key), direction);
+            return this.isTrustedIdentity(Address_1.ProtocolAddress._fromNativeHandle(name), PublicKey._fromNativeHandle(key), direction);
         });
     }
     _getIdentity(name) {
         return __awaiter(this, void 0, void 0, function* () {
-            const key = yield this.getIdentity(ProtocolAddress._fromNativeHandle(name));
+            const key = yield this.getIdentity(Address_1.ProtocolAddress._fromNativeHandle(name));
             if (key == null) {
                 return Promise.resolve(null);
             }
@@ -646,12 +630,12 @@ exports.SignedPreKeyStore = SignedPreKeyStore;
 class SenderKeyStore {
     _saveSenderKey(sender, distributionId, record) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this.saveSenderKey(ProtocolAddress._fromNativeHandle(sender), uuid.stringify(distributionId), SenderKeyRecord._fromNativeHandle(record));
+            return this.saveSenderKey(Address_1.ProtocolAddress._fromNativeHandle(sender), uuid.stringify(distributionId), SenderKeyRecord._fromNativeHandle(record));
         });
     }
     _getSenderKey(sender, distributionId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const skr = yield this.getSenderKey(ProtocolAddress._fromNativeHandle(sender), uuid.stringify(distributionId));
+            const skr = yield this.getSenderKey(Address_1.ProtocolAddress._fromNativeHandle(sender), uuid.stringify(distributionId));
             if (skr == null) {
                 return null;
             }

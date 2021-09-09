@@ -4,12 +4,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 Object.defineProperty(exports, "__esModule", { value: true });
+const Address_1 = require("./Address");
 var ErrorCode;
 (function (ErrorCode) {
     ErrorCode[ErrorCode["Generic"] = 0] = "Generic";
     ErrorCode[ErrorCode["DuplicatedMessage"] = 1] = "DuplicatedMessage";
     ErrorCode[ErrorCode["SealedSenderSelfSend"] = 2] = "SealedSenderSelfSend";
     ErrorCode[ErrorCode["UntrustedIdentity"] = 3] = "UntrustedIdentity";
+    ErrorCode[ErrorCode["InvalidRegistrationId"] = 4] = "InvalidRegistrationId";
 })(ErrorCode = exports.ErrorCode || (exports.ErrorCode = {}));
 class SignalClientErrorBase extends Error {
     constructor(message, name, operation, extraProps) {
@@ -31,6 +33,16 @@ class SignalClientErrorBase extends Error {
         //   via https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
         if (Error.captureStackTrace) {
             Error.captureStackTrace(this);
+        }
+    }
+    get addr() {
+        switch (this.code) {
+            case ErrorCode.UntrustedIdentity:
+                return this._addr;
+            case ErrorCode.InvalidRegistrationId:
+                return Address_1.ProtocolAddress._fromNativeHandle(this._addr);
+            default:
+                throw new TypeError(`cannot get address from this error (${this})`);
         }
     }
 }

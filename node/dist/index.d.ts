@@ -1,5 +1,7 @@
 /// <reference types="node" />
 export * from './Errors';
+import { ProtocolAddress } from './Address';
+export * from './Address';
 import * as Native from './Native';
 export declare const initLogger: typeof Native.initLogger, LogLevel: typeof Native.LogLevel;
 export declare const enum CiphertextMessageType {
@@ -50,14 +52,6 @@ export declare class Aes256GcmSiv {
     static new(key: Buffer): Aes256GcmSiv;
     encrypt(message: Buffer, nonce: Buffer, associated_data: Buffer): Buffer;
     decrypt(message: Buffer, nonce: Buffer, associated_data: Buffer): Buffer;
-}
-export declare class ProtocolAddress {
-    readonly _nativeHandle: Native.ProtocolAddress;
-    private constructor();
-    static _fromNativeHandle(handle: Native.ProtocolAddress): ProtocolAddress;
-    static new(name: string, deviceId: number): ProtocolAddress;
-    name(): string;
-    deviceId(): number;
 }
 export declare class PublicKey {
     readonly _nativeHandle: Native.PublicKey;
