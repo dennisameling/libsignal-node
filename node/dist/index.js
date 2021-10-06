@@ -3,6 +3,16 @@
 // Copyright 2020-2021 Signal Messenger, LLC.
 // SPDX-License-Identifier: AGPL-3.0-only
 //
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,15 +22,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.sealedSenderDecryptToUsmc = exports.sealedSenderDecryptMessage = exports.sealedSenderMultiRecipientMessageForSingleRecipient = exports.sealedSenderMultiRecipientEncrypt = exports.sealedSenderEncrypt = exports.sealedSenderEncryptMessage = exports.signalDecryptPreKey = exports.signalDecrypt = exports.signalEncrypt = exports.processPreKeyBundle = exports.DecryptionErrorMessage = exports.PlaintextContent = exports.CiphertextMessage = exports.SealedSenderDecryptionResult = exports.groupDecrypt = exports.groupEncrypt = exports.SenderKeyStore = exports.SignedPreKeyStore = exports.PreKeyStore = exports.IdentityKeyStore = exports.SessionStore = exports.UnidentifiedSenderMessageContent = exports.SenderKeyMessage = exports.processSenderKeyDistributionMessage = exports.SenderKeyDistributionMessage = exports.SenderCertificate = exports.SenderKeyRecord = exports.ServerCertificate = exports.SessionRecord = exports.PreKeySignalMessage = exports.SignalMessage = exports.SignedPreKeyRecord = exports.PreKeyRecord = exports.PreKeyBundle = exports.IdentityKeyPair = exports.PrivateKey = exports.PublicKey = exports.Aes256GcmSiv = exports.Fingerprint = exports.DisplayableFingerprint = exports.ScannableFingerprint = exports.HKDF = exports.LogLevel = exports.initLogger = void 0;
 const uuid = require("uuid");
 const Errors = require("./Errors");
-__export(require("./Errors"));
+__exportStar(require("./Errors"), exports);
 const Address_1 = require("./Address");
-__export(require("./Address"));
+__exportStar(require("./Address"), exports);
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const NativeImpl = require('node-gyp-build')(__dirname + '/../..');
 exports.initLogger = NativeImpl.initLogger, exports.LogLevel = NativeImpl.LogLevel;

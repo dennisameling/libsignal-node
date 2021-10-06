@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.SignalClientErrorBase = exports.ErrorCode = void 0;
 const Address_1 = require("./Address");
 var ErrorCode;
 (function (ErrorCode) {

@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProtocolAddress = void 0;
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const NativeImpl = require('node-gyp-build')(__dirname + '/../..');
 class ProtocolAddress {
