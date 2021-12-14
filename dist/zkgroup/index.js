@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 //
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReceiptSerial = exports.ReceiptCredentialResponse = exports.ReceiptCredentialRequestContext = exports.ReceiptCredentialRequest = exports.ReceiptCredentialPresentation = exports.ReceiptCredential = exports.ServerZkReceiptOperations = exports.ClientZkReceiptOperations = exports.ProfileKeyVersion = exports.ProfileKeyCredentialResponse = exports.ProfileKeyCredentialRequestContext = exports.ProfileKeyCredentialRequest = exports.ProfileKeyCredentialPresentation = exports.ProfileKeyCredential = exports.ProfileKeyCommitment = exports.ProfileKey = exports.ServerZkProfileOperations = exports.ClientZkProfileOperations = exports.UuidCiphertext = exports.ProfileKeyCiphertext = exports.GroupSecretParams = exports.GroupPublicParams = exports.GroupMasterKey = exports.GroupIdentifier = exports.ClientZkGroupCipher = exports.AuthCredentialPresentation = exports.AuthCredentialResponse = exports.AuthCredential = exports.ServerZkAuthOperations = exports.ClientZkAuthOperations = exports.NotarySignature = exports.ServerSecretParams = exports.ServerPublicParams = void 0;
+exports.ReceiptSerial = exports.ReceiptCredentialResponse = exports.ReceiptCredentialRequestContext = exports.ReceiptCredentialRequest = exports.ReceiptCredentialPresentation = exports.ReceiptCredential = exports.ServerZkReceiptOperations = exports.ClientZkReceiptOperations = exports.PniCredentialResponse = exports.PniCredentialRequestContext = exports.PniCredentialPresentation = exports.PniCredential = exports.ProfileKeyVersion = exports.ProfileKeyCredentialResponse = exports.ProfileKeyCredentialRequestContext = exports.ProfileKeyCredentialRequest = exports.ProfileKeyCredentialPresentation = exports.ProfileKeyCredential = exports.ProfileKeyCommitment = exports.ProfileKey = exports.ServerZkProfileOperations = exports.ClientZkProfileOperations = exports.UuidCiphertext = exports.ProfileKeyCiphertext = exports.GroupSecretParams = exports.GroupPublicParams = exports.GroupMasterKey = exports.GroupIdentifier = exports.ClientZkGroupCipher = exports.AuthCredentialPresentation = exports.AuthCredentialResponse = exports.AuthCredential = exports.ServerZkAuthOperations = exports.ClientZkAuthOperations = exports.NotarySignature = exports.ServerSecretParams = exports.ServerPublicParams = void 0;
 // Root
 var ServerPublicParams_1 = require("./ServerPublicParams");
 Object.defineProperty(exports, "ServerPublicParams", { enumerable: true, get: function () { return ServerPublicParams_1.default; } });
@@ -59,6 +59,14 @@ var ProfileKeyCredentialResponse_1 = require("./profiles/ProfileKeyCredentialRes
 Object.defineProperty(exports, "ProfileKeyCredentialResponse", { enumerable: true, get: function () { return ProfileKeyCredentialResponse_1.default; } });
 var ProfileKeyVersion_1 = require("./profiles/ProfileKeyVersion");
 Object.defineProperty(exports, "ProfileKeyVersion", { enumerable: true, get: function () { return ProfileKeyVersion_1.default; } });
+var PniCredential_1 = require("./profiles/PniCredential");
+Object.defineProperty(exports, "PniCredential", { enumerable: true, get: function () { return PniCredential_1.default; } });
+var PniCredentialPresentation_1 = require("./profiles/PniCredentialPresentation");
+Object.defineProperty(exports, "PniCredentialPresentation", { enumerable: true, get: function () { return PniCredentialPresentation_1.default; } });
+var PniCredentialRequestContext_1 = require("./profiles/PniCredentialRequestContext");
+Object.defineProperty(exports, "PniCredentialRequestContext", { enumerable: true, get: function () { return PniCredentialRequestContext_1.default; } });
+var PniCredentialResponse_1 = require("./profiles/PniCredentialResponse");
+Object.defineProperty(exports, "PniCredentialResponse", { enumerable: true, get: function () { return PniCredentialResponse_1.default; } });
 // Receipts
 var ClientZkReceiptOperations_1 = require("./receipts/ClientZkReceiptOperations");
 Object.defineProperty(exports, "ClientZkReceiptOperations", { enumerable: true, get: function () { return ClientZkReceiptOperations_1.default; } });
