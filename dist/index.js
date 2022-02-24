@@ -23,15 +23,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HsmEnclaveClient = exports.sealedSenderDecryptToUsmc = exports.sealedSenderDecryptMessage = exports.sealedSenderMultiRecipientMessageForSingleRecipient = exports.sealedSenderMultiRecipientEncrypt = exports.sealedSenderEncrypt = exports.sealedSenderEncryptMessage = exports.signalDecryptPreKey = exports.signalDecrypt = exports.signalEncrypt = exports.processPreKeyBundle = exports.DecryptionErrorMessage = exports.PlaintextContent = exports.CiphertextMessage = exports.SealedSenderDecryptionResult = exports.groupDecrypt = exports.groupEncrypt = exports.SenderKeyStore = exports.SignedPreKeyStore = exports.PreKeyStore = exports.IdentityKeyStore = exports.SessionStore = exports.UnidentifiedSenderMessageContent = exports.SenderKeyMessage = exports.processSenderKeyDistributionMessage = exports.SenderKeyDistributionMessage = exports.SenderCertificate = exports.SenderKeyRecord = exports.ServerCertificate = exports.SessionRecord = exports.PreKeySignalMessage = exports.SignalMessage = exports.SignedPreKeyRecord = exports.PreKeyRecord = exports.PreKeyBundle = exports.IdentityKeyPair = exports.PrivateKey = exports.PublicKey = exports.Aes256GcmSiv = exports.Fingerprint = exports.DisplayableFingerprint = exports.ScannableFingerprint = exports.hkdf = exports.HKDF = exports.LogLevel = exports.initLogger = void 0;
+exports.initLogger = exports.LogLevel = exports.HsmEnclaveClient = exports.sealedSenderDecryptToUsmc = exports.sealedSenderDecryptMessage = exports.sealedSenderMultiRecipientMessageForSingleRecipient = exports.sealedSenderMultiRecipientEncrypt = exports.sealedSenderEncrypt = exports.sealedSenderEncryptMessage = exports.signalDecryptPreKey = exports.signalDecrypt = exports.signalEncrypt = exports.processPreKeyBundle = exports.DecryptionErrorMessage = exports.PlaintextContent = exports.CiphertextMessage = exports.SealedSenderDecryptionResult = exports.groupDecrypt = exports.groupEncrypt = exports.SenderKeyStore = exports.SignedPreKeyStore = exports.PreKeyStore = exports.IdentityKeyStore = exports.SessionStore = exports.UnidentifiedSenderMessageContent = exports.SenderKeyMessage = exports.processSenderKeyDistributionMessage = exports.SenderKeyDistributionMessage = exports.SenderCertificate = exports.SenderKeyRecord = exports.ServerCertificate = exports.SessionRecord = exports.PreKeySignalMessage = exports.SignalMessage = exports.SignedPreKeyRecord = exports.PreKeyRecord = exports.PreKeyBundle = exports.IdentityKeyPair = exports.PrivateKey = exports.PublicKey = exports.Aes256GcmSiv = exports.Fingerprint = exports.DisplayableFingerprint = exports.ScannableFingerprint = exports.hkdf = exports.HKDF = exports.ContentHint = exports.Direction = exports.CiphertextMessageType = void 0;
 const uuid = require("uuid");
 const Errors = require("./Errors");
 __exportStar(require("./Errors"), exports);
 const Address_1 = require("./Address");
 __exportStar(require("./Address"), exports);
 const Native = require("../Native");
-exports.initLogger = Native.initLogger, exports.LogLevel = Native.LogLevel;
 Native.registerErrors(Errors);
+// These enums must be kept in sync with their Rust counterparts.
+var CiphertextMessageType;
+(function (CiphertextMessageType) {
+    CiphertextMessageType[CiphertextMessageType["Whisper"] = 2] = "Whisper";
+    CiphertextMessageType[CiphertextMessageType["PreKey"] = 3] = "PreKey";
+    CiphertextMessageType[CiphertextMessageType["SenderKey"] = 7] = "SenderKey";
+    CiphertextMessageType[CiphertextMessageType["Plaintext"] = 8] = "Plaintext";
+})(CiphertextMessageType = exports.CiphertextMessageType || (exports.CiphertextMessageType = {}));
+var Direction;
+(function (Direction) {
+    Direction[Direction["Sending"] = 0] = "Sending";
+    Direction[Direction["Receiving"] = 1] = "Receiving";
+})(Direction = exports.Direction || (exports.Direction = {}));
+// This enum must be kept in sync with sealed_sender.proto.
+var ContentHint;
+(function (ContentHint) {
+    ContentHint[ContentHint["Default"] = 0] = "Default";
+    ContentHint[ContentHint["Resendable"] = 1] = "Resendable";
+    ContentHint[ContentHint["Implicit"] = 2] = "Implicit";
+})(ContentHint = exports.ContentHint || (exports.ContentHint = {}));
 class HKDF {
     /**
      * @deprecated Use the top-level 'hkdf' function for standard HKDF behavior
@@ -131,6 +150,9 @@ class PublicKey {
     verify(msg, sig) {
         return Native.PublicKey_Verify(this, msg, sig);
     }
+    verifyAlternateIdentity(other, signature) {
+        return Native.IdentityKey_VerifyAlternateIdentity(this, other, signature);
+    }
 }
 exports.PublicKey = PublicKey;
 class PrivateKey {
@@ -165,11 +187,15 @@ class IdentityKeyPair {
         this.publicKey = publicKey;
         this.privateKey = privateKey;
     }
-    static new(publicKey, privateKey) {
-        return new IdentityKeyPair(publicKey, privateKey);
+    static generate() {
+        const privateKey = PrivateKey.generate();
+        return new IdentityKeyPair(privateKey.getPublicKey(), privateKey);
     }
     serialize() {
         return Native.IdentityKeyPair_Serialize(this.publicKey, this.privateKey);
+    }
+    signAlternateIdentity(other) {
+        return Native.IdentityKeyPair_SignAlternateIdentity(this.publicKey, this.privateKey, other);
     }
 }
 exports.IdentityKeyPair = IdentityKeyPair;
@@ -352,6 +378,23 @@ class SessionRecord {
     }
     hasCurrentState() {
         return Native.SessionRecord_HasCurrentState(this);
+    }
+    /**
+     * Returns true if this session was marked as needing a PNI signature and has not received a
+     * reply.
+     *
+     * Precondition: `this.hasCurrentState()`
+     */
+    needsPniSignature() {
+        return Native.SessionRecord_NeedsPniSignature(this);
+    }
+    /**
+     * Marks whether this session needs a PNI signature included in outgoing messages.
+     *
+     * Precondition: `this.hasCurrentState()`
+     */
+    setNeedsPniSignature(needsPniSignature) {
+        Native.SessionRecord_SetNeedsPniSignature(this, needsPniSignature);
     }
     currentRatchetKeyMatches(key) {
         return Native.SessionRecord_CurrentRatchetKeyMatches(this, key);
@@ -591,7 +634,7 @@ class IdentityKeyStore {
     }
     _isTrustedIdentity(name, key, sending) {
         return __awaiter(this, void 0, void 0, function* () {
-            const direction = sending ? 0 /* Sending */ : 1 /* Receiving */;
+            const direction = sending ? Direction.Sending : Direction.Receiving;
             return this.isTrustedIdentity(Address_1.ProtocolAddress._fromNativeHandle(name), PublicKey._fromNativeHandle(key), direction);
         });
     }
@@ -789,7 +832,7 @@ exports.signalDecryptPreKey = signalDecryptPreKey;
 function sealedSenderEncryptMessage(message, address, senderCert, sessionStore, identityStore) {
     return __awaiter(this, void 0, void 0, function* () {
         const ciphertext = yield signalEncrypt(message, address, sessionStore, identityStore);
-        const usmc = UnidentifiedSenderMessageContent.new(ciphertext, senderCert, 0 /* Default */, null);
+        const usmc = UnidentifiedSenderMessageContent.new(ciphertext, senderCert, ContentHint.Default, null);
         return yield sealedSenderEncrypt(usmc, address, identityStore);
     });
 }
@@ -851,4 +894,58 @@ class HsmEnclaveClient {
     }
 }
 exports.HsmEnclaveClient = HsmEnclaveClient;
+var LogLevel;
+(function (LogLevel) {
+    LogLevel[LogLevel["Error"] = 1] = "Error";
+    LogLevel[LogLevel["Warn"] = 2] = "Warn";
+    LogLevel[LogLevel["Info"] = 3] = "Info";
+    LogLevel[LogLevel["Debug"] = 4] = "Debug";
+    LogLevel[LogLevel["Trace"] = 5] = "Trace";
+})(LogLevel = exports.LogLevel || (exports.LogLevel = {}));
+function initLogger(maxLevel, callback) {
+    let nativeMaxLevel;
+    switch (maxLevel) {
+        case LogLevel.Error:
+            nativeMaxLevel = 1 /* Error */;
+            break;
+        case LogLevel.Warn:
+            nativeMaxLevel = 2 /* Warn */;
+            break;
+        case LogLevel.Info:
+            nativeMaxLevel = 3 /* Info */;
+            break;
+        case LogLevel.Debug:
+            nativeMaxLevel = 4 /* Debug */;
+            break;
+        case LogLevel.Trace:
+            nativeMaxLevel = 5 /* Trace */;
+            break;
+    }
+    Native.initLogger(nativeMaxLevel, (nativeLevel, target, file, line, message) => {
+        let level;
+        switch (nativeLevel) {
+            case 1 /* Error */:
+                level = LogLevel.Error;
+                break;
+            case 2 /* Warn */:
+                level = LogLevel.Warn;
+                break;
+            case 3 /* Info */:
+                level = LogLevel.Info;
+                break;
+            case 4 /* Debug */:
+                level = LogLevel.Debug;
+                break;
+            case 5 /* Trace */:
+                level = LogLevel.Trace;
+                break;
+            default:
+                callback(LogLevel.Warn, 'signal-client', 'index.ts', 0, 'unknown log level ' + nativeLevel + '; treating as error');
+                level = LogLevel.Error;
+                break;
+        }
+        callback(level, target, file, line, message);
+    });
+}
+exports.initLogger = initLogger;
 //# sourceMappingURL=index.js.map

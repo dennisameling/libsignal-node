@@ -91,6 +91,8 @@ export function HsmEnclaveClient_EstablishedSend(cli: Wrapper<HsmEnclaveClient>,
 export function HsmEnclaveClient_InitialRequest(obj: Wrapper<HsmEnclaveClient>): Buffer;
 export function HsmEnclaveClient_New(trustedPublicKey: Buffer, trustedCodeHashes: Buffer): HsmEnclaveClient;
 export function IdentityKeyPair_Serialize(publicKey: Wrapper<PublicKey>, privateKey: Wrapper<PrivateKey>): Buffer;
+export function IdentityKeyPair_SignAlternateIdentity(publicKey: Wrapper<PublicKey>, privateKey: Wrapper<PrivateKey>, otherIdentity: Wrapper<PublicKey>): Buffer;
+export function IdentityKey_VerifyAlternateIdentity(publicKey: Wrapper<PublicKey>, otherIdentity: Wrapper<PublicKey>, signature: Buffer): boolean;
 export function PlaintextContent_Deserialize(data: Buffer): PlaintextContent;
 export function PlaintextContent_FromDecryptionErrorMessage(m: Wrapper<DecryptionErrorMessage>): PlaintextContent;
 export function PlaintextContent_GetBody(obj: Wrapper<PlaintextContent>): Buffer;
@@ -247,7 +249,9 @@ export function SessionRecord_Deserialize(data: Buffer): SessionRecord;
 export function SessionRecord_GetLocalRegistrationId(obj: Wrapper<SessionRecord>): number;
 export function SessionRecord_GetRemoteRegistrationId(obj: Wrapper<SessionRecord>): number;
 export function SessionRecord_HasCurrentState(obj: Wrapper<SessionRecord>): boolean;
+export function SessionRecord_NeedsPniSignature(obj: Wrapper<SessionRecord>): boolean;
 export function SessionRecord_Serialize(obj: Wrapper<SessionRecord>): Buffer;
+export function SessionRecord_SetNeedsPniSignature(s: Wrapper<SessionRecord>, needsPniSignature: boolean): void;
 export function SignalMessage_Deserialize(data: Buffer): SignalMessage;
 export function SignalMessage_GetBody(obj: Wrapper<SignalMessage>): Buffer;
 export function SignalMessage_GetCounter(obj: Wrapper<SignalMessage>): number;

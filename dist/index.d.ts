@@ -3,18 +3,17 @@ export * from './Errors';
 import { ProtocolAddress } from './Address';
 export * from './Address';
 import * as Native from '../Native';
-export declare const initLogger: typeof Native.initLogger, LogLevel: typeof Native.LogLevel;
-export declare const enum CiphertextMessageType {
+export declare enum CiphertextMessageType {
     Whisper = 2,
     PreKey = 3,
     SenderKey = 7,
     Plaintext = 8
 }
-export declare const enum Direction {
+export declare enum Direction {
     Sending = 0,
     Receiving = 1
 }
-export declare const enum ContentHint {
+export declare enum ContentHint {
     Default = 0,
     Resendable = 1,
     Implicit = 2
@@ -64,6 +63,7 @@ export declare class PublicKey {
     serialize(): Buffer;
     getPublicKeyBytes(): Buffer;
     verify(msg: Buffer, sig: Buffer): boolean;
+    verifyAlternateIdentity(other: PublicKey, signature: Buffer): boolean;
 }
 export declare class PrivateKey {
     readonly _nativeHandle: Native.PrivateKey;
@@ -77,11 +77,12 @@ export declare class PrivateKey {
     getPublicKey(): PublicKey;
 }
 export declare class IdentityKeyPair {
-    private readonly publicKey;
-    private readonly privateKey;
+    readonly publicKey: PublicKey;
+    readonly privateKey: PrivateKey;
     constructor(publicKey: PublicKey, privateKey: PrivateKey);
-    static new(publicKey: PublicKey, privateKey: PrivateKey): IdentityKeyPair;
+    static generate(): IdentityKeyPair;
     serialize(): Buffer;
+    signAlternateIdentity(other: PublicKey): Buffer;
 }
 export declare class PreKeyBundle {
     readonly _nativeHandle: Native.PreKeyBundle;
@@ -152,6 +153,19 @@ export declare class SessionRecord {
     localRegistrationId(): number;
     remoteRegistrationId(): number;
     hasCurrentState(): boolean;
+    /**
+     * Returns true if this session was marked as needing a PNI signature and has not received a
+     * reply.
+     *
+     * Precondition: `this.hasCurrentState()`
+     */
+    needsPniSignature(): boolean;
+    /**
+     * Marks whether this session needs a PNI signature included in outgoing messages.
+     *
+     * Precondition: `this.hasCurrentState()`
+     */
+    setNeedsPniSignature(needsPniSignature: boolean): void;
     currentRatchetKeyMatches(key: PublicKey): boolean;
 }
 export declare class ServerCertificate {
@@ -330,3 +344,11 @@ export declare class HsmEnclaveClient {
     establishedSend(buffer: Buffer): Buffer;
     establishedRecv(buffer: Buffer): Buffer;
 }
+export declare enum LogLevel {
+    Error = 1,
+    Warn = 2,
+    Info = 3,
+    Debug = 4,
+    Trace = 5
+}
+export declare function initLogger(maxLevel: LogLevel, callback: (level: LogLevel, target: string, file: string | null, line: number | null, message: string) => void): void;
